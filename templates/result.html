@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stock Data Results</title>
+
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
+  
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h2 {
+      margin-top: 40px;
+      margin-bottom: 10px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 40px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Stock Information: {{ data.get('longName', data.get('shortName', 'N/A')) }}</h1>
+
+  <!-- Main Data Table -->
+  <h2>Company Data</h2>
+  <table>
+    <tbody>
+      {% for label, key in [
+        ('Address', 'address1'),
+        ('City', 'city'),
+        ('State', 'state'),
+        ('Zip Code', 'zip'),
+        ('Country', 'country'),
+        ('Phone', 'phone'),
+        ('Website', 'website'),
+        ('Industry', 'industryDisp'),
+        ('Sector', 'sectorDisp'),
+        ('Description', 'longBusinessSummary'),
+        ('Market Cap', 'marketCap'),
+        ('Current Price', 'currentPrice'),
+        ('52 Week High', 'fiftyTwoWeekHigh'),
+        ('52 Week Low', 'fiftyTwoWeekLow'),
+        ('Dividend Yield', 'dividendYield'),
+        ('PE Ratio (Forward)', 'forwardPE'),
+        ('PE Ratio (Trailing)', 'trailingPE'),
+        ('Beta', 'beta'),
+        ('Volume', 'volume'),
+        ('Average Volume (3 Month)', 'averageDailyVolume3Month'),
+        ('Open Price', 'open'),
+        ('Previous Close', 'previousClose'),
+        ('Day High', 'dayHigh'),
+        ('Day Low', 'dayLow'),
+        ('Profit Margin', 'profitMargins'),
+        ('Return on Equity', 'returnOnEquity'),
+        ('Return on Assets', 'returnOnAssets'),
+        ('Total Revenue', 'totalRevenue'),
+        ('Net Income', 'netIncomeToCommon'),
+        ('Shares Outstanding', 'sharesOutstanding'),
+        ('Float Shares', 'floatShares'),
+        ('Short Ratio', 'shortRatio'),
+        ('Short Percent of Float', 'shortPercentOfFloat'),
+        ('Recommendation', 'recommendationKey'),
+        ('Number of Analyst Opinions', 'numberOfAnalystOpinions'),
+        ('Target Mean Price', 'targetMeanPrice'),
+        ('Target High Price', 'targetHighPrice'),
+        ('Target Low Price', 'targetLowPrice'),
+        ('Regular Market Change (%)', 'regularMarketChangePercent')
+      ] %}
+      <tr>
+        <th>{{ label }}</th>
+        <td>
+          {% if data[key] is defined and data[key] is not none %}
+            {% if data[key] is number %}
+              {{ "{:,.2f}".format(data[key]) }}
+            {% else %}
+              {{ data[key] }}
+            {% endif %}
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Officers Table -->
+  <h2>Company Officers</h2>
+  {% if data.companyOfficers %}
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Age</th>
+        <th>Year Born</th>
+        <th>Total Pay (USD)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for officer in data.companyOfficers %}
+      <tr>
+        <td>{{ officer.name or 'N/A' }}</td>
+        <td>{{ officer.title or 'N/A' }}</td>
+        <td>{{ officer.age or 'N/A' }}</td>
+        <td>{{ officer.yearBorn or 'N/A' }}</td>
+        <td>
+          {% if officer.totalPay is defined and officer.totalPay is not none %}
+            {{ "{:,.2f}".format(officer.totalPay) }}
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>No officer data available.</p>
+  {% endif %}
+
+  <!-- Price History Table -->
+  {% if history %}
+  <h2>Price History</h2>
+  <table id="historyTable" class="display nowrap" style="width:100%">
+    <thead>
+      <tr>
+        {% for col in history[0].keys() %}
+          <th>{{ col }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in history %}
+      <tr>
+        {% for value in row.values() %}
+          <td>{{ value }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% if history %}
+    <h2>Price History Graph</h2>
+    <canvas id="priceChart" height="100"></canvas>
+  {% endif %}
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+  <!-- JSZip for Excel export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- pdfmake for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Zoom Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+  <!-- Luxon date library (required for time scale) -->
+<script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+
+<!-- Chart.js adapter for Luxon -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1"></script>
+
+
+
+  <script>
+    $(document).ready(function() {
+      $('#historyTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            'copy',
+            'csv',
+            'excel',
+            {
+            extend: 'pdfHtml5',
+            orientation: 'landscape',         // Landscape mode
+            pageSize: 'A4',                   // Page size (A4 is default but can be changed)
+            exportOptions: {
+                columns: ':visible'             // Export all visible columns
+            },
+            customize: function (doc) {
+                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                // The above line makes columns auto-width and spread evenly in the page
+
+                // Optionally reduce font size to fit more columns
+                doc.defaultStyle.fontSize = 8;
+
+                // Optionally add page margins
+                doc.pageMargins = [10, 10, 10, 10];
+            }
+            },
+            'print'
+        ],
+        paging: true,
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
+        searching: true,
+        ordering: true,
+        order: [[0, 'desc']],
+        scrollX: true,
+        responsive: true
+        });
+    });
+  </script>
+  {% if history %}
+<script>
+  const labels = {{ history | map(attribute='Date') | list | tojson }};
+  const closePrices = {{ history | map(attribute='Close') | list | tojson }};
+
+  const ctx = document.getElementById('priceChart').getContext('2d');
+  const priceChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Close Price',
+        data: closePrices,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        fill: true,
+        pointRadius: 0,
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          type: 'time',
+          time: {
+            tooltipFormat: 'MMM D, YYYY HH:mm',
+            unit: 'day'
+          },
+          title: {
+            display: true,
+            text: 'Date'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Close Price (USD)'
+          }
+        }
+      },
+      plugins: {
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'x'
+          },
+          zoom: {
+            wheel: {
+              enabled: true
+            },
+            pinch: {
+              enabled: true
+            },
+            mode: 'x'
+          }
+        },
+        legend: {
+          display: true
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false
+        }
+      }
+    }
+  });
+</script>
+{% endif %}
+
+</body>
+</html>

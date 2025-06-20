@@ -1,12 +1,15 @@
 import yfinance as yf
-
 from swiftshadow import QuickProxy
+from tabulate import tabulate
+import pandas as pd
 
 #prox = QuickProxy().as_string()
 #print("Using Proxy: ", prox)
 #yf.set_config(proxy=str(prox))
 
+'''
 def getData(symbol, history=False):
+    symbol = str(symbol).upper()
     dat = yf.Ticker(symbol)
 
     # Fetching data index
@@ -49,12 +52,13 @@ def getData(symbol, history=False):
     print("Total Debt: ", dat.info['totalDebt'])
     print("Return on Equity: ", dat.info['returnOnEquity'])
     print("Return on Assets: ", dat.info['returnOnAssets'])
-    print("Return on Investment: ", dat.info['returnOnInvestment'])
+    # print("Return on Investment: ", dat.info['returnOnInvestment'])
     print("Operating Margin: ", dat.info['operatingMargins'])
     print("Profit Margin: ", dat.info['profitMargins'])
     print("Revenue: ", dat.info['totalRevenue'])
     print("Revenue Growth: ", dat.info['revenueGrowth'])
     print("Net Income: ", dat.info['netIncomeToCommon'])
+
     """
     print("Total Assets: ", dat.info['totalAssets'])
     print("Total Liabilities: ", dat.info['totalLiab'])
@@ -84,8 +88,64 @@ def getData(symbol, history=False):
 
     if history:
         # Fetching historical data
-        hist = dat.history(period=history)
-        print("\nHistorical Data (last {}):".format(history))
-        print(hist)
+        #print as nice table using python library tabulate
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.width', 1000)
+        from datetime import datetime, timedelta
+        if history == '1d':
+            history = '1d'
+        elif history == '1w':
+            history = '1w'
+        elif history == '1m':
+            history = '1mo'
+        elif history == '3m':
+            history = '3mo'
+        elif history == '6m':
+            history = '6mo'
+        elif history == '1y':
+            history = '1y'
+        elif history == '2y':
+            history = '2y'
+        elif history == '5y':
+            history = '5y'
+        else:
+            raise ValueError("Invalid history period. Use: 1d, 1w, 1m, 3m, 6m, 1y, 2y, or 5y.")
+        if history == '1d':
+            hist = dat.history(period='1d', interval='1m')
+        else:
+            hist = dat.history(period=history)
+        
+        hist.reset_index(inplace=True)
+        hist['Date'] = hist['Date'].dt.strftime('%Y-%m-%d %H:%M:%S')
+        hist = hist[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
 
-getData('GOOGL', history='1y')  # Example usage with 1 year of historical data
+        print("\nHistorical Data for the last", history, ":\n")
+        print(tabulate(hist, headers='keys', tablefmt='pretty', showindex=False))
+        return dat.info
+        #return hist
+    else:
+        print("\nNo historical data requested.\n")
+        return dat.info
+        #return None
+'''
+        
+import yfinance as yf
+
+def getData(symbol, history=False):
+    dat = yf.Ticker(symbol)
+    info = dat.info
+
+    hist = None
+    if history:
+        # Accept common history periods; default 1mo if history is truthy but not specific
+        valid_periods = ['1d', '1wk', '1mo', '3mo', '6mo', '1y', '2y', '5y']
+        period = history if history in valid_periods else '1mo'
+
+        hist_df = dat.history(period=period)
+        hist_df.reset_index(inplace=True)
+        # Format date nicely
+        hist_df['Date'] = hist_df['Date'].dt.strftime('%Y-%m-%d')
+        # Convert DataFrame to list of dicts for easy Jinja rendering
+        hist = hist_df.to_dict(orient='records')
+
+    return {'info': info, 'history': hist}

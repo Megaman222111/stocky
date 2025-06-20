@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stock Info Form</title>
+</head>
+<body>
+  <h1>Enter Stock Symbol</h1>
+  <form method="post">
+    <label for="symbol">Symbol:</label>
+    <input type="text" id="symbol" name="symbol" required />
+    <br /><br />
+
+    <label for="history">Select history period (optional):</label>
+    <select name="history" id="history">
+      <option value="">No History</option>
+      <option value="1d">1 Day</option>
+      <option value="1wk">1 Week</option>
+      <option value="1mo">1 Month</option>
+      <option value="3mo">3 Months</option>
+      <option value="6mo">6 Months</option>
+      <option value="1y">1 Year</option>
+      <option value="2y">2 Years</option>
+      <option value="5y">5 Years</option>
+    </select>
+    <br /><br />
+
+    <button type="submit">Get Data</button>
+  </form>
+</body>
+</html>
