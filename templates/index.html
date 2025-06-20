@@ -2,30 +2,105 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Stock Info Form</title>
+  <title>Stocky - Stock Info</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      color: #333;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 80px auto;
+      padding: 40px;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      font-size: 32px;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+
+    button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 12px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
 </head>
 <body>
-  <h1>Enter Stock Symbol</h1>
-  <form method="post">
-    <label for="symbol">Symbol:</label>
-    <input type="text" id="symbol" name="symbol" required />
-    <br /><br />
+  <div class="container">
+    <h1>Stocky</h1>
+    <form method="post">
+      <label for="symbol">Stock Symbol</label>
+      <input type="text" id="symbol" name="symbol" placeholder="e.g., AAPL, GOOGL" required />
 
-    <label for="history">Select history period (optional):</label>
-    <select name="history" id="history">
-      <option value="">No History</option>
-      <option value="1d">1 Day</option>
-      <option value="1wk">1 Week</option>
-      <option value="1mo">1 Month</option>
-      <option value="3mo">3 Months</option>
-      <option value="6mo">6 Months</option>
-      <option value="1y">1 Year</option>
-      <option value="2y">2 Years</option>
-      <option value="5y">5 Years</option>
-    </select>
-    <br /><br />
+      <label for="history">Select History Period (optional)</label>
+      <select name="history" id="history">
+        <option value="">No History</option>
+        <option value="1d">1 Day</option>
+        <option value="1wk">1 Week</option>
+        <option value="1mo">1 Month</option>
+        <option value="3mo">3 Months</option>
+        <option value="6mo">6 Months</option>
+        <option value="1y">1 Year</option>
+        <option value="2y">2 Years</option>
+        <option value="5y">5 Years</option>
+      </select>
 
-    <button type="submit">Get Data</button>
-  </form>
+      <button type="submit">Get Stock Data</button>
+    </form>
+  </div>
+
 </body>
 </html>
